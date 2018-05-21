@@ -56,6 +56,8 @@ public class MyCucumberRunner extends ParentRunner<FeatureRunner> {
     }
 
     private void addChildren(List<CucumberFeature> cucumberFeatures) throws InitializationError {
+        System.out.println("Generate Feature File ----- ");
+        createFeatureFile("src/test/resources/featureTemplates/featureTemplate.feature", "src/test/resources/features/dynamicFeatureTest.feature");
         Iterator var2 = cucumberFeatures.iterator();
 
         while (var2.hasNext()) {
@@ -105,8 +107,6 @@ public class MyCucumberRunner extends ParentRunner<FeatureRunner> {
     }
 
     protected Statement childrenInvoker(RunNotifier notifier) {
-        System.out.println("Generate Feature File ----- ");
-        createFeatureFile("src/test/resources/featureTemplates/featureTemplate.feature", "src/test/resources/features/dynamicFeatureTest.feature");
         final Statement features = super.childrenInvoker(notifier);
         return new Statement() {
             public void evaluate() throws Throwable {
