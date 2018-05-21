@@ -1,7 +1,7 @@
 package com.test.cucumber;
 
+import cucumber.api.event.TestRunFinished;
 import cucumber.api.formatter.Formatter;
-import cucumber.api.junit.Cucumber;
 import cucumber.runtime.ClassFinder;
 import cucumber.runtime.Runtime;
 import cucumber.runtime.RuntimeOptions;
@@ -14,7 +14,11 @@ import cucumber.runtime.junit.FeatureRunner;
 import cucumber.runtime.junit.JUnitOptions;
 import cucumber.runtime.junit.JUnitReporter;
 import cucumber.runtime.model.CucumberFeature;
+import org.junit.runner.Description;
+import org.junit.runner.notification.RunNotifier;
+import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -26,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class MyCucumberRunner extends Cucumber {
+public class MyCucumberRunner extends ParentRunner<FeatureRunner> {
 
     private final JUnitReporter jUnitReporter;
     private final List<FeatureRunner> children = new ArrayList();
@@ -34,10 +38,9 @@ public class MyCucumberRunner extends Cucumber {
     private final Formatter formatter;
 
     public MyCucumberRunner(Class clazz) throws InitializationError, IOException {
-
         super(clazz);
-        System.out.println("Generate Feature File ----- ");
-        createFeatureFile("src/test/resources/featureTemplates/featureTemplate.feature", "src/test/resources/features/dynamicFeatureTest.feature");
+//        System.out.println("Generate Feature File ----- ");
+//        createFeatureFile("src/test/resources/featureTemplates/featureTemplate.feature", "src/test/resources/features/dynamicFeatureTest.feature");
         ClassLoader classLoader = clazz.getClassLoader();
         Assertions.assertNoCucumberAnnotatedMethods(clazz);
         RuntimeOptionsFactory runtimeOptionsFactory = new RuntimeOptionsFactory(clazz);
@@ -55,8 +58,8 @@ public class MyCucumberRunner extends Cucumber {
     private void addChildren(List<CucumberFeature> cucumberFeatures) throws InitializationError {
         Iterator var2 = cucumberFeatures.iterator();
 
-        while(var2.hasNext()) {
-            CucumberFeature cucumberFeature = (CucumberFeature)var2.next();
+        while (var2.hasNext()) {
+            CucumberFeature cucumberFeature = (CucumberFeature) var2.next();
             FeatureRunner featureRunner = new FeatureRunner(cucumberFeature, this.runtime, this.jUnitReporter);
             if (!featureRunner.isEmpty()) {
                 this.children.add(featureRunner);
@@ -87,6 +90,30 @@ public class MyCucumberRunner extends Cucumber {
             e.printStackTrace();
         }
 
+    }
+
+    public List<FeatureRunner> getChildren() {
+        return this.children;
+    }
+
+    protected Description describeChild(FeatureRunner child) {
+        return child.getDescription();
+    }
+
+    protected void runChild(FeatureRunner child, RunNotifier notifier) {
+        child.run(notifier);
+    }
+
+    protected Statement childrenInvoker(RunNotifier notifier) {
+        System.out.println("Generate Feature File ----- ");
+        createFeatureFile("src/test/resources/featureTemplates/featureTemplate.feature", "src/test/resources/features/dynamicFeatureTest.feature");
+        final Statement features = super.childrenInvoker(notifier);
+        return new Statement() {
+            public void evaluate() throws Throwable {
+                features.evaluate();
+                MyCucumberRunner.this.runtime.getEventBus().send(new TestRunFinished(MyCucumberRunner.this.runtime.getEventBus().getTime()));
+            }
+        };
     }
 
 }
