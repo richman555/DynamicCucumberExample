@@ -17,6 +17,11 @@ import cucumber.runtime.model.CucumberFeature;
 import org.junit.runners.model.InitializationError;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -32,6 +37,7 @@ public class MyCucumberRunner extends Cucumber {
 
         super(clazz);
         System.out.println("Generate Feature File ----- ");
+        createFeatureFile("src/test/resources/featureTemplates/featureTemplate.feature", "src/test/resources/features/dynamicFeatureTest.feature");
         ClassLoader classLoader = clazz.getClassLoader();
         Assertions.assertNoCucumberAnnotatedMethods(clazz);
         RuntimeOptionsFactory runtimeOptionsFactory = new RuntimeOptionsFactory(clazz);
@@ -55,6 +61,30 @@ public class MyCucumberRunner extends Cucumber {
             if (!featureRunner.isEmpty()) {
                 this.children.add(featureRunner);
             }
+        }
+
+    }
+
+    private void createFeatureFile(String templateFileLocation, String featureFileLocation) {
+
+        Path path = Paths.get(templateFileLocation);
+        Path path2 = Paths.get(featureFileLocation);
+        Charset charset = StandardCharsets.UTF_8;
+
+        String content = null;
+        try {
+            content = new String(Files.readAllBytes(path), charset);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        content = content.replaceAll("#EXAMPLES1", "    Examples:\n" +
+                "      | start | eat | left |\n" +
+                "      |  12   |  5  |  7   |\n" +
+                "      |  20   |  5  |  15  |");
+        try {
+            Files.write(path2, content.getBytes(charset));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
     }
