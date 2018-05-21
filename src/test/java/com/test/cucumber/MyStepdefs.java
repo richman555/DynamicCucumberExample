@@ -9,17 +9,17 @@ public class MyStepdefs implements En {
 
         Given("there are {int} cucumbers", (Integer int1) -> {
             // Write code here that turns the phrase above into concrete actions
-            throw new PendingException();
+            System.out.println(int1);
         });
 
         When("I eat {int} cucumbers", (Integer int1) -> {
             // Write code here that turns the phrase above into concrete actions
-            throw new PendingException();
+            System.out.println(int1);
         });
 
         Then("I should have {int} cucumbers", (Integer int1) -> {
             // Write code here that turns the phrase above into concrete actions
-            throw new PendingException();
+            System.out.println(int1);
         });
 
     }
